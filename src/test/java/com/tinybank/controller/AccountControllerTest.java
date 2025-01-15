@@ -50,13 +50,17 @@ class AccountControllerTest {
 
     @Test
     void testDeposit() throws Exception {
+        String validRequest = "{\"amount\": 100.00}";
+
         when(accountService.deposit(any(BigDecimal.class))).thenReturn(BigDecimal.valueOf(100.00));
 
         mockMvc.perform(post("/api/account/deposit")
-                .param("amount", "100.00"))
+                .contentType("application/json")
+                .content(validRequest))
                 .andExpect(status().isOk())
                 .andExpect(content().string("100.0"));
     }
+
 
     @Test
     void testWithdraw() throws Exception {
@@ -101,6 +105,18 @@ class AccountControllerTest {
                 .andExpect(status().isBadRequest()) // Expect HTTP 400
                 .andExpect(jsonPath("$.error").value("insufficient_balance"))
                 .andExpect(jsonPath("$.message").value("Insufficient balance"));
+    }
+    
+    @Test
+    void testDepositValidation() throws Exception {
+        // Test with invalid amount
+        String invalidRequest = "{\"amount\": 0.50}";
+
+        mockMvc.perform(post("/api/account/deposit")
+                .contentType("application/json")
+                .content(invalidRequest))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.amount").value("Deposit amount must be at least 1.00"));
     }
 
 }

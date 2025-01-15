@@ -1,15 +1,24 @@
 package com.tinybank.controller;
 
+import java.math.BigDecimal;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.tinybank.dto.DepositRequest;
 import com.tinybank.model.Transaction;
 import com.tinybank.service.AccountService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import java.math.BigDecimal;
-import java.util.List;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/account")
@@ -18,14 +27,14 @@ public class AccountController {
     @Autowired
     private AccountService accountService;
 
-    @Operation(summary = "Deposit money into the account", description = "Adds the specified amount to the account balance.")
+    @Operation(summary = "Deposit money into the account.", description = "Adds the specified amount to the account balance, that sould be between 1.00 and 1,000,000.00")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Deposit successful"),
             @ApiResponse(responseCode = "400", description = "Invalid deposit amount")
     })
     @PostMapping("/deposit")
-    public BigDecimal deposit(@RequestParam BigDecimal amount) {
-        return accountService.deposit(amount);
+    public BigDecimal deposit(@Valid @RequestBody DepositRequest depositRequest) {
+        return accountService.deposit(depositRequest.getAmount());
     }
 
     @Operation(summary = "Withdraw money from the account", description = "Subtracts the specified amount from the account balance.")
