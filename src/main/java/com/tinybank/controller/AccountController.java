@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
+import jakarta.websocket.server.PathParam;
 
 @RestController
 @RequestMapping("/api/account")
@@ -34,7 +35,7 @@ public class AccountController {
     })
     @PostMapping("/deposit")
     public BigDecimal deposit(@Valid @RequestBody DepositRequest depositRequest) {
-        return accountService.deposit(depositRequest.getAmount());
+        return accountService.deposit(depositRequest);
     }
 
     @Operation(summary = "Withdraw money from the account", description = "Subtracts the specified amount from the account balance.")
@@ -60,8 +61,17 @@ public class AccountController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Transaction history retrieved successfully")
     })
+    
     @GetMapping("/transactions")
     public List<Transaction> getTransactionHistory() {
         return accountService.getTransactionHistory();
     }
+    
+    @GetMapping("/by-keyword/{keyword}")
+    public List<Transaction> findTransactionsByKeyword(@PathParam String keyword){
+    	return accountService.findByLabelCointaingIgnoreCase(keyword);
+    	
+    }
+    
+    
 }

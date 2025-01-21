@@ -6,11 +6,14 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.tinybank.dto.DepositRequest;
 import com.tinybank.exception.InsufficientBalanceException;
 import com.tinybank.model.Account;
 import com.tinybank.model.Transaction;
 import com.tinybank.repository.AccountRepository;
 import com.tinybank.repository.TransactionRepository;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class AccountService {
@@ -29,15 +32,16 @@ public class AccountService {
      * @param amount the amount to deposit
      * @return the updated balance
      */
-    public BigDecimal deposit(BigDecimal amount) {
+    public BigDecimal deposit(DepositRequest depostiRequest) {
         Account account = getDefaultAccount();
 
-        account.setBalance(account.getBalance().add(amount));
+        account.setBalance(account.getBalance().add(depostiRequest.getAmount()));
 
         Transaction transaction = new Transaction();
         transaction.setType("DEPOSIT");
-        transaction.setAmount(amount);
+        transaction.setAmount(depostiRequest.getAmount());
         transaction.setAccount(account);
+        transaction.setLabel(depostiRequest.getLabel());
 
         transactionRepository.save(transaction);
         account.getTransactions().add(transaction);
@@ -73,6 +77,10 @@ public class AccountService {
         return account.getBalance();
     }
 
+    public List<Transaction> findByLabelCointaingIgnoreCase(String keyword){
+    	
+    	return transactionRepository.findByLabelCointaingIgnoreCase(keyword);
+    }
 
     /**
      * Get the current balance of the default account.
